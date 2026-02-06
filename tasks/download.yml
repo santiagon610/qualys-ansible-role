@@ -82,7 +82,7 @@
 - name: Download | Create temporary XML file (Linux/macOS/Unix)
   ansible.builtin.copy:
     content: "{{ qualys_download_xml }}"
-    dest: "{{ qualys_temp_dir }}/download_request.xml"
+    dest: "{{ qualys_temp_dir | ansible.builtin.trim }}/download_request.xml"
     mode: '0600'
     owner: root
     group: "{{ 'wheel' if ansible_facts['system'] == 'Darwin' else 'root' }}"
@@ -92,7 +92,7 @@
 - name: Download | Create temporary XML file (Windows)
   ansible.windows.win_copy:
     content: "{{ qualys_download_xml }}"
-    dest: "{{ qualys_temp_dir }}\\download_request.xml"
+    dest: "{{ qualys_temp_dir | ansible.builtin.trim }}\\download_request.xml"
   when: ansible_facts['os_family'] == 'Windows'
 
 - name: Download | Set download path based on OS
@@ -154,7 +154,7 @@
 
 - name: Download | Cleanup XML request file (Linux/macOS/Unix)
   ansible.builtin.file:
-    path: "{{ qualys_temp_dir }}/download_request.xml"
+    path: "{{ qualys_temp_dir | ansible.builtin.trim }}/download_request.xml"
     state: absent
   when: ansible_facts['os_family'] != 'Windows'
   become: true
@@ -162,7 +162,7 @@
 
 - name: Download | Cleanup XML request file (Windows)
   ansible.windows.win_file:
-    path: "{{ qualys_temp_dir }}\\download_request.xml"
+    path: "{{ qualys_temp_dir | ansible.builtin.trim }}\\download_request.xml"
     state: absent
   when: ansible_facts['os_family'] == 'Windows'
   ignore_errors: true
