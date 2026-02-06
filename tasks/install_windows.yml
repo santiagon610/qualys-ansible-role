@@ -72,13 +72,7 @@
 - name: Windows | Install Qualys Cloud Agent
   ansible.windows.win_package:
     path: "{{ qualys_agent_windows_download_path }}\\{{ qualys_agent_windows_installer_name }}"
-    arguments: >
-      CustomerId={{ qualys_customer_id }}
-      ActivationId={{ qualys_activation_id }}
-      WebServiceUri={{ qualys_cloud_platform }}/CloudAgent/
-      {% if qualys_agent_proxy_url %}ProxyUri={{ qualys_agent_proxy_url }}{% endif %}
-      {% if qualys_agent_log_level %}LogLevel={{ qualys_agent_log_level }}{% endif %}
-      /s
+    arguments: "CustomerId={{ qualys_customer_id }} ActivationId={{ qualys_activation_id }} WebServiceUri={{ qualys_cloud_platform }}/CloudAgent/{% if qualys_agent_proxy_url %} ProxyUri={{ qualys_agent_proxy_url }}{% endif %}{% if qualys_agent_log_level %} LogLevel={{ qualys_agent_log_level }}{% endif %} /s"
     state: present
     creates_service: "{{ qualys_agent_service_name_windows }}"
   register: qualys_agent_installed

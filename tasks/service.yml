@@ -108,6 +108,4 @@
 
     - name: Service | Agent service management completed
       ansible.builtin.debug:
-        msg: >-
-          Qualys Cloud Agent service is {{ qualys_agent_service_state }}
-          and {{ 'enabled' if qualys_agent_service_enabled else 'disabled' }} on system startup.
+        msg: "Qualys Cloud Agent service is {{ qualys_agent_service_state }} and {{ 'enabled' if qualys_agent_service_enabled else 'disabled' }} on system startup."
