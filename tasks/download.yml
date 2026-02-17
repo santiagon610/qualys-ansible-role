@@ -28,14 +28,22 @@
     qualys_download_xml: |
       <?xml version="1.0" encoding="UTF-8"?>
       <ServiceRequest>
-        <filters>
-          <Criteria field="platform" operator="EQUALS">{{ qualys_platform_type }}</Criteria>
-          <Criteria field="architecture" operator="EQUALS">{{ qualys_architecture }}</Criteria>
-        </filters>
-        <preferences>
-          <preference name="packageType" value="{{ qualys_package_type }}"/>
-        </preferences>
+        <data>
+          <DownloadBinary>
+            <platform>{{ qualys_platform_type }}</platform>
+            <architecture>{{ qualys_architecture }}</architecture>
+            <packageType>{{ qualys_package_type }}</packageType>
+          </DownloadBinary>
+        </data>
       </ServiceRequest>
+
+    # <filters>
+    #   <Criteria field="platform" operator="EQUALS">{{ qualys_platform_type }}</Criteria>
+    #   <Criteria field="architecture" operator="EQUALS">{{ qualys_architecture }}</Criteria>
+    # </filters>
+    # <preferences>
+    #   <preference name="packageType" value="{{ qualys_package_type }}"/>
+    # </preferences>
 
 - name: Download | Set temp directory path
   ansible.builtin.set_fact:
