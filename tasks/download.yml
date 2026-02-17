@@ -32,7 +32,6 @@
           <DownloadBinary>
             <platform>{{ qualys_platform_type }}</platform>
             <architecture>{{ qualys_architecture }}</architecture>
-            <packageType>{{ qualys_package_type }}</packageType>
           </DownloadBinary>
         </data>
       </ServiceRequest>
