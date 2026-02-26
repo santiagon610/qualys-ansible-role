@@ -15,7 +15,7 @@
       - qualys_api_password | length > 0
     fail_msg: "Required variables not set. Define: qualys_activation_id, qualys_customer_id, qualys_cloud_platform, qualys_api_username, qualys_api_password"
     success_msg: "Required credentials validated."
-  no_log: true
+  # no_log: true
   tags:
     - always
     - preflight
@@ -39,7 +39,7 @@
       - qualys_customer_id is regex('^[a-zA-Z0-9_-]+$')
     fail_msg: "qualys_activation_id and qualys_customer_id must contain only alphanumeric characters, hyphens, and underscores"
     success_msg: "Credential format validated."
-  no_log: true
+  # no_log: true
   tags:
     - always
     - preflight

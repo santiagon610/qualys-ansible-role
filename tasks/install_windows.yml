@@ -76,7 +76,7 @@
     state: present
     creates_service: "{{ qualys_agent_service_name_windows }}"
   register: qualys_agent_installed
-  no_log: true
+  # no_log: true
   timeout: "{{ qualys_agent_install_timeout }}"
   tags:
     - install

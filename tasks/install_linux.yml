@@ -110,7 +110,7 @@
       register: qualys_agent_activation
       changed_when: "'Successfully activated' in qualys_agent_activation.stdout or qualys_agent_activation.rc == 0"
       failed_when: qualys_agent_activation.rc not in [0, 1]
-      no_log: true
+      # no_log: true
       timeout: "{{ qualys_agent_install_timeout }}"
       become: true
 
