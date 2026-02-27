@@ -24,7 +24,7 @@
       failed_when: false
 
     - name: Linux | Remove Qualys Cloud Agent package (RPM)
-      ansible.builtin.package:
+      ansible.builtin.dnf:
         name: "{{ qualys_agent_linux_package_name }}"
         state: absent
       when: ansible_facts['os_family'] in ['RedHat', 'Suse']
@@ -71,7 +71,7 @@
     - download
 
 - name: Linux | Install Qualys Cloud Agent (RPM)
-  ansible.builtin.package:
+  ansible.builtin.dnf:
     name: "{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}"
     state: present
   when: ansible_facts['os_family'] in ['RedHat', 'Suse']
