@@ -12,72 +12,31 @@
 
 - name: Download | Detect platform type and architecture
   ansible.builtin.set_fact:
-    qualys_platform_type: >-
-      {% if ansible_facts['system'] == 'Linux' %}
-        {% if ansible_facts['distribution'] == 'Ubuntu' %}
-          {% if ansible_facts['architecture'] == 's390x' %}LINUX_UBUNTU_S_390_X{% else %}LINUX_UBUNTU{% endif %}
-        {% elif ansible_facts['distribution'] == 'CoreOS' %}LINUX_COREOS
-        {% elif ansible_facts['distribution'] == 'Gentoo' %}GENTOO_LINUX
-        {% elif 'Amazon' in ansible_facts['distribution'] %}LINUX_AWSBR
-        {% elif ansible_facts['architecture'] == 'ppc64le' %}LINUX_PPC_64_LE
-        {% elif ansible_facts['architecture'] == 's390x' %}LINUX_S_390_X
-        {% else %}LINUX{% endif %}
-      {% elif ansible_facts['system'] == 'Darwin' %}
-        {% if ansible_facts['architecture'] == 'arm64' %}MACOSX_M_1{% else %}MACOSX{% endif %}
-      {% elif ansible_facts['os_family'] == 'Windows' %}WINDOWS
-      {% elif ansible_facts['system'] == 'AIX' %}AIX
-      {% elif ansible_facts['system'] == 'FreeBSD' or ansible_facts['system'] == 'OpenBSD' %}BSD
-      {% elif ansible_facts['system'] == 'SunOS' %}
-        {% if ansible_facts['architecture'] == 'sparc' %}SOLARIS_SPARC{% else %}SOLARIS_X_86{% endif %}
-      {% else %}LINUX{% endif %}
-    qualys_architecture: >-
-      {% if ansible_facts['architecture'] in ['x86_64', 'amd64'] %}X_86_64
-      {% elif ansible_facts['architecture'] == 'arm64' or ansible_facts['architecture'] == 'aarch64' %}ARM_64
-      {% elif ansible_facts['architecture'] == 'x64' %}X_64
-      {% elif ansible_facts['architecture'] == 'ppc64le' %}PPC_64_LE
-      {% elif ansible_facts['architecture'] == 's390x' %}S_390_X
-      {% elif ansible_facts['architecture'] == 'sparc' %}SPARC
-      {% elif 'power' in ansible_facts['architecture'] %}POWER_5
-      {% else %}X_86_64{% endif %}
-    qualys_package_type: >-
-      {% if ansible_facts['system'] == 'Linux' %}
-        {% if ansible_facts['os_family'] in ['RedHat', 'Suse'] %}rpm
-        {% elif ansible_facts['os_family'] == 'Debian' %}deb
-        {% else %}rpm{% endif %}
-      {% elif ansible_facts['system'] == 'Darwin' %}pkg
-      {% elif ansible_facts['os_family'] == 'Windows' %}msi
-      {% elif ansible_facts['system'] == 'AIX' %}aix
-      {% elif ansible_facts['system'] in ['FreeBSD', 'OpenBSD'] %}bsd
-      {% elif ansible_facts['system'] == 'SunOS' %}solaris
-      {% else %}rpm{% endif %}
+    qualys_platform_type: "{% if ansible_facts['system'] == 'Linux' %}{% if ansible_facts['distribution'] == 'Ubuntu' %}{% if ansible_facts['architecture'] == 's390x' %}LINUX_UBUNTU_S_390_X{% else %}LINUX_UBUNTU{% endif %}{% elif ansible_facts['distribution'] == 'CoreOS' %}LINUX_COREOS{% elif ansible_facts['distribution'] == 'Gentoo' %}GENTOO_LINUX{% elif 'Amazon' in ansible_facts['distribution'] %}LINUX_AWSBR{% elif ansible_facts['architecture'] == 'ppc64le' %}LINUX_PPC_64_LE{% elif ansible_facts['architecture'] == 's390x' %}LINUX_S_390_X{% else %}LINUX{% endif %}{% elif ansible_facts['system'] == 'Darwin' %}{% if ansible_facts['architecture'] == 'arm64' %}MACOSX_M_1{% else %}MACOSX{% endif %}{% elif ansible_facts['os_family'] == 'Windows' %}WINDOWS{% elif ansible_facts['system'] == 'AIX' %}AIX{% elif ansible_facts['system'] == 'FreeBSD' or ansible_facts['system'] == 'OpenBSD' %}BSD{% elif ansible_facts['system'] == 'SunOS' %}{% if ansible_facts['architecture'] == 'sparc' %}SOLARIS_SPARC{% else %}SOLARIS_X_86{% endif %}{% else %}LINUX{% endif %}"
+    qualys_architecture: "{% if ansible_facts['architecture'] in ['x86_64', 'amd64'] %}X_86_64{% elif ansible_facts['architecture'] == 'arm64' or ansible_facts['architecture'] == 'aarch64' %}ARM_64{% elif ansible_facts['architecture'] == 'x64' %}X_64{% elif ansible_facts['architecture'] == 'ppc64le' %}PPC_64_LE{% elif ansible_facts['architecture'] == 's390x' %}S_390_X{% elif ansible_facts['architecture'] == 'sparc' %}SPARC{% elif 'power' in ansible_facts['architecture'] %}POWER_5{% else %}X_86_64{% endif %}"
 
 - name: Download | Display detected platform
   ansible.builtin.debug:
     msg:
       - "Platform Type: {{ qualys_platform_type }}"
       - "Architecture: {{ qualys_architecture }}"
-      - "Package Type: {{ qualys_package_type }}"
 
 - name: Download | Create XML request body
   ansible.builtin.set_fact:
     qualys_download_xml: |
       <?xml version="1.0" encoding="UTF-8"?>
       <ServiceRequest>
-        <filters>
-          <Criteria field="platform" operator="EQUALS">{{ qualys_platform_type }}</Criteria>
-          <Criteria field="architecture" operator="EQUALS">{{ qualys_architecture }}</Criteria>
-        </filters>
-        <preferences>
-          <preference name="packageType" value="{{ qualys_package_type }}"/>
-        </preferences>
+        <data>
+          <DownloadBinary>
+            <platform>{{ qualys_platform_type }}</platform>
+            <architecture>{{ qualys_architecture }}</architecture>
+          </DownloadBinary>
+        </data>
       </ServiceRequest>
 
 - name: Download | Set temp directory path
   ansible.builtin.set_fact:
-    qualys_temp_dir: >-
-      {% if ansible_facts['system'] == 'Linux' %}{{ qualys_agent_linux_download_path }}
-      {% elif ansible_facts['system'] == 'Darwin' %}{{ qualys_agent_macos_download_path }}
-      {% else %}{{ qualys_agent_windows_download_path }}{% endif %}
+    qualys_temp_dir: "{% if ansible_facts['system'] == 'Linux' %}{{ qualys_agent_linux_download_path }}{% elif ansible_facts['system'] == 'Darwin' %}{{ qualys_agent_macos_download_path }}{% else %}{{ qualys_agent_windows_download_path }}{% endif %}"
 
 - name: Download | Create temporary XML file (Linux/macOS/Unix)
   ansible.builtin.copy:
@@ -97,14 +56,7 @@
 
 - name: Download | Set download path based on OS
   ansible.builtin.set_fact:
-    qualys_download_path: >-
-      {% if ansible_facts['system'] == 'Linux' %}
-      {{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}
-      {% elif ansible_facts['system'] == 'Darwin' %}
-      {{ qualys_agent_macos_download_path }}/{{ qualys_agent_macos_package_name }}
-      {% elif ansible_facts['os_family'] == 'Windows' %}
-      {{ qualys_agent_windows_download_path }}\{{ qualys_agent_windows_installer_name }}
-      {% endif %}
+    qualys_download_path: "{% if ansible_facts['system'] == 'Linux' %}{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}{% elif ansible_facts['system'] == 'Darwin' %}{{ qualys_agent_macos_download_path }}/{{ qualys_agent_macos_package_name }}{% elif ansible_facts['os_family'] == 'Windows' %}{{ qualys_agent_windows_download_path }}\\{{ qualys_agent_windows_installer_name }}{% endif %}"
 
 - name: Download | Fetch agent from Qualys API (Linux/macOS/Unix)
   ansible.builtin.uri:
