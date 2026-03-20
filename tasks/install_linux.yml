@@ -105,7 +105,7 @@
           - /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent.sh
           - "ActivationId={{ qualys_activation_id }}"
           - "CustomerId={{ qualys_customer_id }}"
-          - "WebServiceUri={{ qualys_cloud_platform }}/CloudAgent/"
+          - "WebServiceUri={{ qualys_cloud_platform }}/CloudAgent"
           - "{{ 'ProxyUri=' + qualys_agent_proxy_url if qualys_agent_proxy_url else omit }}"
           - "{{ 'LogLevel=' + (qualys_agent_log_level | string) if qualys_agent_log_level else omit }}"
       register: qualys_agent_activation
