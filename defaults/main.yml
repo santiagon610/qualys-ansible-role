@@ -22,7 +22,7 @@ qualys_agent_windows_installer_name: "QualysCloudAgent.exe"
 
 qualys_agent_service_enabled: true
 qualys_agent_service_state: "started"
-qualys_agent_service_name_linux: "qualysagent"
+qualys_agent_service_name_linux: "qualys-cloud-agent"
 qualys_agent_service_name_windows: "QualysAgent"
 
 qualys_agent_proxy_url: ""
