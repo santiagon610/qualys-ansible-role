@@ -1,0 +1,33 @@
+---
+# Validation tasks for Qualys Cloud Agent on macOS
+
+- name: Validate | Check if agent app exists (macOS)
+  ansible.builtin.stat:
+    path: /Applications/QualysCloudAgent.app/Contents/MacOS/qualys-cloud-agent
+  register: qualys_binary_macos
+
+- name: Validate | Verify agent binary (macOS)
+  ansible.builtin.assert:
+    that:
+      - qualys_binary_macos.stat.exists
+      - qualys_binary_macos.stat.executable
+    fail_msg: "Qualys agent binary not found or not executable"
+    success_msg: "Qualys agent binary validated successfully"
+
+- name: Validate | Check agent log file (macOS)
+  ansible.builtin.stat:
+    path: /Library/Application Support/Qualys/QualysCloudAgent/qualys-cloud-agent.log
+  register: qualys_log_macos
+
+- name: Validate | Verify log file exists (macOS)
+  ansible.builtin.debug:
+    msg: "Agent log file {{ 'exists' if qualys_log_macos.stat.exists else 'not yet created' }}"
+
+- name: Validate | Check LaunchDaemon (macOS)
+  ansible.builtin.stat:
+    path: /Library/LaunchDaemons/com.qualys.cloud-agent.plist
+  register: qualys_launchd_macos
+
+- name: Validate | Display LaunchDaemon status (macOS)
+  ansible.builtin.debug:
+    msg: "LaunchDaemon {{ 'configured' if qualys_launchd_macos.stat.exists else 'not found' }}"

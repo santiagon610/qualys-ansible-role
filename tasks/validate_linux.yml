@@ -1,0 +1,58 @@
+---
+# Validation tasks for Qualys Cloud Agent on Linux
+
+- name: Validate | Check if agent binary exists (Linux)
+  ansible.builtin.stat:
+    path: "/usr/local/qualys/cloud-agent/bin/qualys-cloud-agent"
+  register: qualys_binary_linux
+
+- name: Validate | Verify agent binary (Linux)
+  ansible.builtin.assert:
+    that:
+      - qualys_binary_linux.stat.exists
+      - qualys_binary_linux.stat.executable
+    fail_msg: "Qualys agent binary not found or not executable"
+    success_msg: "Qualys agent binary validated successfully"
+
+- name: Validate | Check agent configuration (Linux)
+  ansible.builtin.stat:
+    path: "{{ qualys_agent_config_path_linux }}/qualys-cloud-agent.conf"
+  register: qualys_config_linux
+  ignore_errors: true
+
+- name: Validate | Get agent version (Linux)
+  ansible.builtin.command:
+    cmd: /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent --version
+  register: qualys_version_linux
+  changed_when: false
+  failed_when: false
+
+- name: Validate | Display agent version (Linux)
+  ansible.builtin.debug:
+    msg: "Qualys Cloud Agent version: {{ qualys_version_linux.stdout | default('Unable to determine') }}"
+
+- name: Validate | Check agent log file (Linux)
+  ansible.builtin.stat:
+    path: "{{ qualys_agent_log_path_linux }}/qualys-cloud-agent.log"
+  register: qualys_log_linux
+
+- name: Validate | Verify log file exists (Linux)
+  ansible.builtin.debug:
+    msg: "Agent log file {{ 'exists' if qualys_log_linux.stat.exists else 'not yet created' }}"
+
+- name: Validate | Check agent connectivity (Linux)
+  ansible.builtin.uri:
+    url: "{{ qualys_cloud_platform }}/CloudAgent/"
+    method: GET
+    timeout: 10
+    validate_certs: true
+  register: qualys_connectivity
+  ignore_errors: true
+  delegate_to: localhost
+  run_once: true
+
+- name: Validate | Display connectivity status (Linux)
+  ansible.builtin.debug:
+    msg: >-
+      Connectivity to Qualys platform:
+      {{ 'OK' if qualys_connectivity.status is defined and qualys_connectivity.status == 200 else 'Unable to verify' }}

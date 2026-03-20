@@ -1,0 +1,46 @@
+---
+# Validation tasks for Qualys Cloud Agent on Windows
+
+- name: Validate | Check if agent binary exists (Windows)
+  ansible.windows.win_stat:
+    path: "C:\\Program Files\\Qualys\\QualysAgent\\QualysAgent.exe"
+  register: qualys_binary_windows
+
+- name: Validate | Verify agent binary (Windows)
+  ansible.builtin.assert:
+    that:
+      - qualys_binary_windows.stat.exists
+    fail_msg: "Qualys agent binary not found"
+    success_msg: "Qualys agent binary validated successfully"
+
+- name: Validate | Get installed agent information (Windows)
+  ansible.windows.win_package_facts:
+  register: qualys_package_info
+
+- name: Validate | Find Qualys package details (Windows)
+  ansible.builtin.set_fact:
+    qualys_installed_version: "{{ ansible_facts.packages | selectattr('name', 'search', 'Qualys') | list }}"
+
+- name: Validate | Display agent information (Windows)
+  ansible.builtin.debug:
+    msg: "Qualys Cloud Agent is installed: {{ qualys_binary_windows.stat.exists }}"
+
+- name: Validate | Check agent log file (Windows)
+  ansible.windows.win_stat:
+    path: "{{ qualys_agent_log_path_windows }}\\qualys-cloud-agent.log"
+  register: qualys_log_windows
+
+- name: Validate | Verify log file exists (Windows)
+  ansible.builtin.debug:
+    msg: "Agent log file {{ 'exists' if qualys_log_windows.stat.exists else 'not yet created' }}"
+
+- name: Validate | Check Windows Firewall rule
+  ansible.windows.win_shell: |
+    Get-NetFirewallRule -DisplayName "Qualys Cloud Agent" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled
+  register: qualys_firewall_rule
+  changed_when: false
+  failed_when: false
+
+- name: Validate | Display firewall rule status (Windows)
+  ansible.builtin.debug:
+    msg: "Firewall rule status: {{ qualys_firewall_rule.stdout | trim if qualys_firewall_rule.stdout else 'Not configured' }}"

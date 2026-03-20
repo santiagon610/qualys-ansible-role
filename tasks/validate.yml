@@ -1,149 +1,17 @@
 ---
 # Validation tasks for Qualys Cloud Agent installation
 
-- name: Validate | Check installation on Linux
-  when:
-    - ansible_facts['os_family'] != "Windows"
-  block:
-    - name: Validate | Check if agent binary exists (Linux)
-      ansible.builtin.stat:
-        path: "/usr/local/qualys/cloud-agent/bin/qualys-cloud-agent"
-      register: qualys_binary_linux
+- name: Validate | Include Linux validation
+  ansible.builtin.include_tasks: validate_linux.yml
+  when: ansible_facts['system'] == "Linux"
 
-    - name: Validate | Verify agent binary (Linux)
-      ansible.builtin.assert:
-        that:
-          - qualys_binary_linux.stat.exists
-          - qualys_binary_linux.stat.executable
-        fail_msg: "Qualys agent binary not found or not executable"
-        success_msg: "Qualys agent binary validated successfully"
+- name: Validate | Include macOS validation
+  ansible.builtin.include_tasks: validate_macos.yml
+  when: ansible_facts['system'] == "Darwin"
 
-    - name: Validate | Check agent configuration (Linux)
-      ansible.builtin.stat:
-        path: "{{ qualys_agent_config_path_linux }}/qualys-cloud-agent.conf"
-      register: qualys_config_linux
-      ignore_errors: true
-
-    - name: Validate | Get agent version (Linux)
-      ansible.builtin.command:
-        cmd: /usr/local/qualys/cloud-agent/bin/qualys-cloud-agent --version
-      register: qualys_version_linux
-      changed_when: false
-      failed_when: false
-
-    - name: Validate | Display agent version (Linux)
-      ansible.builtin.debug:
-        msg: "Qualys Cloud Agent version: {{ qualys_version_linux.stdout | default('Unable to determine') }}"
-
-    - name: Validate | Check agent log file (Linux)
-      ansible.builtin.stat:
-        path: "{{ qualys_agent_log_path_linux }}/qualys-cloud-agent.log"
-      register: qualys_log_linux
-
-    - name: Validate | Verify log file exists (Linux)
-      ansible.builtin.debug:
-        msg: "Agent log file {{ 'exists' if qualys_log_linux.stat.exists else 'not yet created' }}"
-
-    - name: Validate | Check agent connectivity (Linux)
-      ansible.builtin.uri:
-        url: "{{ qualys_cloud_platform }}/CloudAgent/"
-        method: GET
-        timeout: 10
-        validate_certs: true
-      register: qualys_connectivity
-      ignore_errors: true
-      delegate_to: localhost
-      run_once: true
-
-    - name: Validate | Display connectivity status (Linux)
-      ansible.builtin.debug:
-        msg: >-
-          Connectivity to Qualys platform:
-          {{ 'OK' if qualys_connectivity.status is defined and qualys_connectivity.status == 200 else 'Unable to verify' }}
-
-- name: Validate | Check installation on macOS
-  when:
-    - ansible_facts['os_family'] == "Darwin"
-  block:
-    - name: Validate | Check if agent app exists (macOS)
-      ansible.builtin.stat:
-        path: /Applications/QualysCloudAgent.app/Contents/MacOS/qualys-cloud-agent
-      register: qualys_binary_macos
-
-    - name: Validate | Verify agent binary (macOS)
-      ansible.builtin.assert:
-        that:
-          - qualys_binary_macos.stat.exists
-          - qualys_binary_macos.stat.executable
-        fail_msg: "Qualys agent binary not found or not executable"
-        success_msg: "Qualys agent binary validated successfully"
-
-    - name: Validate | Check agent log file (macOS)
-      ansible.builtin.stat:
-        path: /Library/Application Support/Qualys/QualysCloudAgent/qualys-cloud-agent.log
-      register: qualys_log_macos
-
-    - name: Validate | Verify log file exists (macOS)
-      ansible.builtin.debug:
-        msg: "Agent log file {{ 'exists' if qualys_log_macos.stat.exists else 'not yet created' }}"
-
-    - name: Validate | Check LaunchDaemon (macOS)
-      ansible.builtin.stat:
-        path: /Library/LaunchDaemons/com.qualys.cloud-agent.plist
-      register: qualys_launchd_macos
-
-    - name: Validate | Display LaunchDaemon status (macOS)
-      ansible.builtin.debug:
-        msg: "LaunchDaemon {{ 'configured' if qualys_launchd_macos.stat.exists else 'not found' }}"
-
-- name: Validate | Check installation on Windows
-  when:
-    - ansible_facts['os_family'] == "Windows"
-  ignore_errors: true
-  block:
-    - name: Validate | Check if agent binary exists (Windows)
-      ansible.windows.win_stat:
-        path: "C:\\Program Files\\Qualys\\QualysAgent\\QualysAgent.exe"
-      register: qualys_binary_windows
-
-    - name: Validate | Verify agent binary (Windows)
-      ansible.builtin.assert:
-        that:
-          - qualys_binary_windows.stat.exists
-        fail_msg: "Qualys agent binary not found"
-        success_msg: "Qualys agent binary validated successfully"
-
-    - name: Validate | Get installed agent information (Windows)
-      ansible.windows.win_package_facts:
-      register: qualys_package_info
-
-    - name: Validate | Find Qualys package details (Windows)
-      ansible.builtin.set_fact:
-        qualys_installed_version: "{{ ansible_facts.packages | selectattr('name', 'search', 'Qualys') | list }}"
-
-    - name: Validate | Display agent information (Windows)
-      ansible.builtin.debug:
-        msg: "Qualys Cloud Agent is installed: {{ qualys_binary_windows.stat.exists }}"
-
-    - name: Validate | Check agent log file (Windows)
-      ansible.windows.win_stat:
-        path: "{{ qualys_agent_log_path_windows }}\\qualys-cloud-agent.log"
-      register: qualys_log_windows
-
-    - name: Validate | Verify log file exists (Windows)
-      ansible.builtin.debug:
-        msg: "Agent log file {{ 'exists' if qualys_log_windows.stat.exists else 'not yet created' }}"
-
-    - name: Validate | Check Windows Firewall rule
-      ansible.windows.win_shell: |
-        Get-NetFirewallRule -DisplayName "Qualys Cloud Agent" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Enabled
-      register: qualys_firewall_rule
-      changed_when: false
-      failed_when: false
-
-    - name: Validate | Display firewall rule status (Windows)
-      ansible.builtin.debug:
-        msg: "Firewall rule status: {{ qualys_firewall_rule.stdout | trim if qualys_firewall_rule.stdout else 'Not configured' }}"
+- name: Validate | Include Windows validation
+  ansible.builtin.include_tasks: validate_windows.yml
+  when: ansible_facts['os_family'] == "Windows"
 
 # Common Validation Tasks
 - name: Validate | Final validation summary
