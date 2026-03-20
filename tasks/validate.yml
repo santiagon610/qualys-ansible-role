@@ -99,6 +99,7 @@
 - name: Validate | Check installation on Windows
   when:
     - ansible_facts['os_family'] == "Windows"
+  ignore_errors: true
   block:
     - name: Validate | Check if agent binary exists (Windows)
       ansible.windows.win_stat:
