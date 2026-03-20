@@ -56,7 +56,7 @@
 
 - name: Download | Set download path based on OS
   ansible.builtin.set_fact:
-    qualys_download_path: "{% if ansible_facts['system'] == 'Linux' %}{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}{% elif ansible_facts['system'] == 'Darwin' %}{{ qualys_agent_macos_download_path }}/{{ qualys_agent_macos_package_name }}{% elif ansible_facts['os_family'] == 'Windows' %}{{ qualys_agent_windows_download_path }}\\{{ qualys_agent_windows_installer_name }}{% endif %}"
+    qualys_download_path: "{% if ansible_facts['system'] == 'Linux' %}{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}{% if ansible_facts['os_family'] in ['RedHat', 'Suse'] %}.rpm{% elif ansible_facts['os_family'] == 'Debian' %}.deb{% endif %}{% elif ansible_facts['system'] == 'Darwin' %}{{ qualys_agent_macos_download_path }}/{{ qualys_agent_macos_package_name }}{% elif ansible_facts['os_family'] == 'Windows' %}{{ qualys_agent_windows_download_path }}\\{{ qualys_agent_windows_installer_name }}{% endif %}"
 
 - name: Download | Fetch agent from Qualys API (Linux/macOS/Unix)
   ansible.builtin.uri:

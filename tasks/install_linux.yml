@@ -72,7 +72,7 @@
 
 - name: Linux | Install Qualys Cloud Agent (RPM)
   ansible.builtin.package:
-    name: "{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}"
+    name: "{{ qualys_download_path }}"
     state: present
   when: ansible_facts['os_family'] in ['RedHat', 'Suse']
   register: qualys_agent_installed_rpm
@@ -82,7 +82,7 @@
 
 - name: Linux | Install Qualys Cloud Agent (DEB)
   ansible.builtin.apt:
-    deb: "{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}"
+    deb: "{{ qualys_download_path }}"
     state: present
   when: ansible_facts['os_family'] == 'Debian'
   register: qualys_agent_installed_deb
@@ -120,7 +120,7 @@
 
 - name: Linux | Cleanup installer
   ansible.builtin.file:
-    path: "{{ qualys_agent_linux_download_path }}/{{ qualys_agent_linux_package_name }}"
+    path: "{{ qualys_download_path }}"
     state: absent
   when:
     - qualys_agent_cleanup_installer | bool
