@@ -79,7 +79,7 @@
   delay: "{{ qualys_agent_retry_delay }}"
   until: qualys_download_result is succeeded
   when: ansible_facts['os_family'] != 'Windows'
-  no_log: true
+  # no_log: true
   become: true
 
 - name: Download | Fetch agent from Qualys API (Windows)
@@ -102,7 +102,7 @@
   delay: "{{ qualys_agent_retry_delay }}"
   until: qualys_download_result_windows is succeeded
   when: ansible_facts['os_family'] == 'Windows'
-  no_log: true
+  # no_log: true
 
 - name: Download | Cleanup XML request file (Linux/macOS/Unix)
   ansible.builtin.file:
