@@ -71,9 +71,10 @@
     - download
 
 - name: Linux | Install Qualys Cloud Agent (RPM)
-  ansible.builtin.package:
+  ansible.builtin.yum:
     name: "{{ qualys_download_path }}"
     state: present
+    disable_gpg_check: true  # Qualys does not publish a GPG key for API-downloaded packages
   when: ansible_facts['os_family'] in ['RedHat', 'Suse']
   register: qualys_agent_installed_rpm
   become: true
