@@ -29,7 +29,7 @@ qualys_agent_proxy_url: ""
 qualys_agent_proxy_username: ""
 qualys_agent_proxy_password: ""
 
-qualys_agent_log_level: 2
+qualys_agent_log_level: 3
 qualys_agent_log_path_linux: "/var/log/qualys"
 qualys_agent_log_path_windows: "C:\\ProgramData\\Qualys\\QualysAgent"
 
