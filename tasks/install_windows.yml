@@ -75,7 +75,7 @@
     arguments: >
       CustomerId={{ qualys_customer_id }}
       ActivationId={{ qualys_activation_id }}
-      ServerUri={{ qualys_cloud_platform }}/CloudAgent/
+      WebServiceUri={{ qualys_cloud_platform }}/CloudAgent/
       {% if qualys_agent_proxy_url %}ProxyUri={{ qualys_agent_proxy_url }}{% endif %}
       {% if qualys_agent_log_level %}LogLevel={{ qualys_agent_log_level }}{% endif %}
       /s
